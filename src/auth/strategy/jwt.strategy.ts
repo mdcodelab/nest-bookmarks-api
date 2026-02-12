@@ -4,6 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Request } from 'express';
 import { User } from '../../user/user.entity';
 
 @Injectable()
@@ -14,23 +15,27 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     private userRepository: Repository<User>,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (req: Request) => {
+          return req?.cookies?.jwt || null;
+        },
+      ]),
       ignoreExpiration: false,
-      secretOrKey: config.get<string>('JWT_SECRET') || '',
+      secretOrKey: config.get<string>('JWT_SECRET') || 'secret',
     });
   }
 
   async validate(payload: { sub: string; email: string }) {
     const user = await this.userRepository.findOne({
-      where: {
-        id: payload.sub,
-      },
+      where: { id: payload.sub },
     });
 
-    if (user) {
-        delete (user as any).password;
+    if (!user) {
+      return null;
     }
 
-    return user;
+    delete (user as any).password;
+
+    return user; // 🔥 asta ajunge în req.user
   }
 }

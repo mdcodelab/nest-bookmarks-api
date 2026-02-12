@@ -6,6 +6,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import { JwtService } from '@nestjs/jwt';
+import type { Response } from 'express';
+
 
 
 @Injectable()
@@ -41,7 +43,7 @@ export class AuthService {
         return newUser;
     } 
 
-    async login(dto: AuthDto) {
+    async login(dto: AuthDto, res: Response ) {
         const user = await this.userRepository.findOne({
             where: {
                 email: dto.email
@@ -65,6 +67,12 @@ export class AuthService {
 
         const token = await this.jwtService.signAsync(payload);
 
+        // ⚡ Setăm cookie-ul direct în service
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000, // 1 zi
+    });
         return {
             access_token: token,
         };

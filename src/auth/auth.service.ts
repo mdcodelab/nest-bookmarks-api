@@ -1,6 +1,6 @@
 import { Injectable, ConflictException, 
     UnauthorizedException } from '@nestjs/common';
-import { AuthDto } from '../dto';
+import { AuthDto } from './dto';
 import * as argon2 from 'argon2';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';

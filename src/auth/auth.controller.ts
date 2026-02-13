@@ -18,7 +18,8 @@ constructor(private readonly authService: AuthService) {}
         return this.authService.login(dto, res)
     }
 
-
-
-
+    @Post("logout")
+    logout(@Res({ passthrough: true }) res: ExpressResponse){
+        return this.authService.logout(res);
+    }
 }

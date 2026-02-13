@@ -34,7 +34,7 @@ export class AuthService {
             password: hash,
             firstName: dto.firstName,
             lastName: dto.lastName,
-            role: (dto.role as Role) || Role.USER,
+            role: Role.USER,
         })
 
         await this.userRepository.save(newUser);
@@ -76,6 +76,16 @@ export class AuthService {
     });
         return {
             access_token: token,
+        };
+    }
+
+    async logout(res: Response) {
+        res.clearCookie('jwt', {
+            httpOnly: true,
+            sameSite: 'strict',
+        });
+        return {
+            message: 'Logout successful',
         };
     }
 }
